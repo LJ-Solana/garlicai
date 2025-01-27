@@ -1,81 +1,113 @@
 "use client"
 import React, { useState } from 'react';
-import { Brain, ArrowRight, Copy, Check } from 'lucide-react';
+import { Brain, ArrowRight, Copy, Check, Globe } from 'lucide-react';
+
+const translations = {
+  en: {
+    title: 'GarlicAI',
+    subtitle: 'Powered by DeepSeek, seasoned with garlic',
+    description: 'Bringing the flavor of artificial intelligence to the Garlicoin ecosystem. A tasteful blend of machine learning and blockchain technology.',
+    contractAddress: 'Contract Address',
+    copyTooltip: 'Copy address',
+    copiedTooltip: 'Copied!',
+    footer: '© 2025 GarlicAI'
+  },
+  zh: {
+    title: 'GarlicAI',
+    subtitle: '由 DeepSeek 驱动，以大蒜调味',
+    description: '为 Garlicoin 生态系统带来人工智能的风味。机器学习和区块链技术的完美融合。',
+    contractAddress: '合约地址',
+    copyTooltip: '复制地址',
+    copiedTooltip: '已复制！',
+    footer: '© 2025 GarlicAI'
+  }
+};
 
 const SimpleLanding = () => {
   const [copied, setCopied] = useState(false);
+  const [language, setLanguage] = useState('en');
+  const contractAddress = "H1sWyyDceAPpGmMUxVBCHcR2LrCjz933pUyjWSLpump";
+  const t = translations[language];
 
   const handleCopy = async () => {
-    const address = "H1sWyyDceAPpGmMUxVBCHcR2LrCjz933pUyjWSLpump";
-    await navigator.clipboard.writeText(address);
+    await navigator.clipboard.writeText(contractAddress);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const toggleLanguage = () => {
+    setLanguage(prev => prev === 'en' ? 'zh' : 'en');
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-yellow-50 to-yellow-100 flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-yellow-200 rounded-full blur-3xl opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-yellow-300 rounded-full blur-3xl opacity-20 animate-pulse delay-1000"></div>
+    <div className="min-h-screen bg-gradient-to-b from-yellow-50 via-white to-yellow-50 flex flex-col items-center px-4 py-8">
+      {/* Language Toggle */}
+      <div className="w-full max-w-5xl flex justify-end px-4">
+        <button
+          onClick={toggleLanguage}
+          className="flex items-center space-x-2 px-4 py-2 rounded-full bg-white/80 shadow-sm hover:shadow-md transition-all duration-300"
+        >
+          <Globe className="h-4 w-4 text-gray-600" />
+          <span className="text-sm text-gray-600">{language === 'en' ? '中文' : 'English'}</span>
+        </button>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-2xl text-center relative">
-        {/* Logo/Icon */}
-        <div className="flex justify-center mb-8">
-          <div className="bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full p-4 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-            <Brain className="h-12 w-12 text-white animate-pulse" />
+      <div className="max-w-4xl w-full text-center mt-12 mb-auto">
+        <div className="space-y-24">
+          {/* Logo and Title Section */}
+          <div className="space-y-12">
+            {/* Logo/Icon */}
+            <div className="flex justify-center">
+              <div className="bg-yellow-500 rounded-full p-5 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                <Brain className="h-14 w-14 text-white" />
+              </div>
+            </div>
+
+            {/* Title Section */}
+            <div className="space-y-8">
+              <h1 className="text-6xl font-bold text-black">
+                {t.title}
+              </h1>
+
+              <div className="space-y-6">
+                <p className="text-2xl text-gray-800">
+                  {t.subtitle}
+                </p>
+
+                <p className="text-gray-800 max-w-2xl mx-auto text-lg leading-relaxed">
+                  {t.description}
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* Title */}
-        <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-600 to-yellow-800 mb-4 hover:scale-105 transition-transform duration-300">
-          GarlicAI
-        </h1>
-
-        {/* Subtitle */}
-        <p className="text-xl text-gray-600 mb-8 hover:text-gray-800 transition-colors">
-          Powered by DeepSeek, seasoned with garlic
-        </p>
-
-        {/* Description */}
-        <p className="text-gray-600 mb-8 max-w-xl mx-auto leading-relaxed">
-          Bringing the flavor of artificial intelligence to the Garlicoin ecosystem. 
-          A tasteful blend of machine learning and blockchain technology.
-        </p>
-
-        {/* Wallet Address */}
-        <div className="mb-8 p-4 bg-white/80 backdrop-blur-sm rounded-lg max-w-xl mx-auto relative group hover:shadow-lg transition-all duration-300">
-          <p className="text-sm text-gray-500 mb-2">Contract Address</p>
-          <div className="flex items-center justify-between">
-            <p className="font-mono text-gray-700 break-all">
-              CA: H1sWyyDceAPpGmMUxVBCHcR2LrCjz933pUyjWSLpump
-            </p>
-            <button
-              onClick={handleCopy}
-              className="ml-2 p-2 text-gray-500 hover:text-yellow-600 hover:scale-110 transition-all duration-300"
-              title="Copy address"
-            >
-              {copied ? (
-                <Check className="h-4 w-4 text-green-500" />
-              ) : (
-                <Copy className="h-4 w-4" />
-              )}
-            </button>
+          {/* Contract Address Box */}
+          <div className="max-w-2xl mx-auto bg-white/80 backdrop-blur-sm rounded-xl p-10 shadow-sm border border-yellow-100">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">{t.contractAddress}</h2>
+            <div className="flex items-center justify-between bg-yellow-50 rounded-lg p-5">
+              <code className="font-mono text-gray-800 text-base break-all">
+                {contractAddress}
+              </code>
+              <button
+                onClick={handleCopy}
+                className="ml-6 p-2.5 text-gray-500 hover:text-yellow-600 hover:scale-110 transition-all duration-300"
+                title={copied ? t.copiedTooltip : t.copyTooltip}
+              >
+                {copied ? (
+                  <Check className="h-6 w-6 text-green-500" />
+                ) : (
+                  <Copy className="h-6 w-6" />
+                )}
+              </button>
+            </div>
           </div>
-        </div>
-
-        {/* Coming Soon */}
-        <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer">
-          <span className="font-semibold">Coming Soon</span>
-          <ArrowRight className="ml-2 h-4 w-4 animate-bounce" />
         </div>
       </div>
 
       {/* Footer */}
-      <footer className="mt-16 text-sm text-gray-600 relative">
-        © 2025 GarlicAI
+      <footer className="w-full max-w-5xl text-center text-sm text-gray-700 mt-24 pt-8 border-t border-gray-100">
+        {t.footer}
       </footer>
     </div>
   );
