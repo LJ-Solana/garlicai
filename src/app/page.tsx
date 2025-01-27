@@ -1,4 +1,4 @@
-import SimpleLanding from './components/SimpleLanding'
+import SimpleLanding from '@/app/components/SimpleLanding'
 
 export default function Home() {
   return <SimpleLanding />

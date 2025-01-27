@@ -2,7 +2,21 @@
 import React, { useState } from 'react';
 import { Brain, Copy, Check, Globe } from 'lucide-react';
 
-const translations = {
+interface Translation {
+  title: string;
+  subtitle: string;
+  description: string;
+  contractAddress: string;
+  copyTooltip: string;
+  copiedTooltip: string;
+  footer: string;
+}
+
+interface Translations {
+  [key: string]: Translation;
+}
+
+const translations: Translations = {
   en: {
     title: 'GarlicAI',
     subtitle: 'Powered by DeepSeek, seasoned with garlic',
@@ -25,7 +39,7 @@ const translations = {
 
 const SimpleLanding = () => {
   const [copied, setCopied] = useState(false);
-  const [language, setLanguage] = useState('en');
+  const [language, setLanguage] = useState<'en' | 'zh'>('en');
   const contractAddress = "H1sWyyDceAPpGmMUxVBCHcR2LrCjz933pUyjWSLpump";
   const t = translations[language];
 
@@ -115,4 +129,4 @@ const SimpleLanding = () => {
   );
 };
 
-export default SimpleLanding;
+export default SimpleLanding; 
