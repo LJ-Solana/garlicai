@@ -1,6 +1,6 @@
 "use client"
 import React, { useState } from 'react';
-import { Brain, ArrowRight, Copy, Check, Globe } from 'lucide-react';
+import { Brain, Copy, Check, Globe } from 'lucide-react';
 
 const translations = {
   en: {
@@ -30,9 +30,11 @@ const SimpleLanding = () => {
   const t = translations[language];
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(contractAddress);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (typeof navigator !== 'undefined') {
+      await navigator.clipboard.writeText(contractAddress);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   const toggleLanguage = () => {
