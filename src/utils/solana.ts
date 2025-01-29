@@ -39,7 +39,7 @@ export async function burnTokens(wallet: any, amount: number) {
   }
 
   // Convert 10000 GARLIC to the correct amount with 9 decimals
-  const burnAmount = 10 * Math.pow(10, 9);
+  const burnAmount = 5 * Math.pow(10, 9);
 
   try {
     const burnIx = createBurnInstruction(

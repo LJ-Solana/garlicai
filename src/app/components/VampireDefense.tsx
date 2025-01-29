@@ -22,8 +22,19 @@ const translations = {
     connectWallet: 'Connect wallet to generate strategy',
     insufficientBalance: 'Insufficient GARLIC balance. Need 1000 GARLIC tokens.',
     burnFailed: 'Failed to burn tokens',
-    burning: 'Burning 10000 GARLIC tokens 🔥',
-    burnSuccess: 'Successfully burned 10000 GARLIC tokens 🔥',
+    burning: 'Burning 5000 GARLIC tokens 🔥',
+    burnSuccess: 'Successfully burned 5000 GARLIC tokens 🔥',
+    gameExplainer: {
+      title: 'How it works',
+      rules: [
+        'Burn 5,000 GARLIC tokens to generate a vampire defense strategy',
+        'Each strategy gets an effectiveness score (0-100%)',
+        'Your wallet\'s average effectiveness score is tracked',
+        'The wallet with the highest average score at the end of each day wins',
+        'Daily winner receives the GARLIC escrow for that day'
+      ],
+      note: '* Daily competition resets at 00:00 UTC'
+    }
   },
   zh: {
     title: '吸血鬼防御生成器',
@@ -39,8 +50,19 @@ const translations = {
     connectWallet: '连接钱包以生成策略',
     insufficientBalance: 'GARLIC余额不足。需要1000个GARLIC代币。',
     burnFailed: '代币销毁失败',
-    burning: '正在销毁 10000 个 GARLIC 代币 🔥',
-    burnSuccess: '成功销毁 10000 个 GARLIC 代币 🔥',
+    burning: '正在销毁 5000 个 GARLIC 代币 🔥',
+    burnSuccess: '成功销毁 5000 个 GARLIC 代币 🔥',
+    gameExplainer: {
+      title: '游戏规则',
+      rules: [
+        '销毁 5,000 个 GARLIC 代币来生成吸血鬼防御策略',
+        '每个策略都会获得效果评分（0-100%）',
+        '系统会追踪你钱包的平均效果评分',
+        '每天结束时平均分最高的钱包获胜',
+        '每日获胜者将获得当天销毁的 GARLIC 代币'
+      ],
+      note: '* 每日比赛在 UTC 00:00 重置'
+    }
   }
 };
 
@@ -149,6 +171,23 @@ const VampireDefense = () => {
             </h1>
             <p className="text-xl text-gray-800">
               {t.subtitle}
+            </p>
+          </div>
+
+          <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-sm border border-yellow-100 text-left">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              {t.gameExplainer.title}
+            </h2>
+            <ul className="space-y-2">
+              {t.gameExplainer.rules.map((rule, index) => (
+                <li key={index} className="flex items-start">
+                  <span className="text-yellow-500 mr-2">•</span>
+                  <span className="text-gray-700">{rule}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="text-sm text-gray-500 mt-4 italic">
+              {t.gameExplainer.note}
             </p>
           </div>
 
