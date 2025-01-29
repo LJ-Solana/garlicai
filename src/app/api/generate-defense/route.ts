@@ -25,20 +25,27 @@ async function generateEffectiveness(content: string): Promise<number> {
   return 70 + (num % 26); // Range 70-95
 }
 
-export const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
+export const runtime = 'edge';
 
 export async function OPTIONS() {
   return new Response(null, {
     status: 204,
-    headers: corsHeaders,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
   });
 }
 
 export async function POST(request: NextRequest) {
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Content-Type': 'application/json',
+  };
+
   try {
     const body = await request.json();
     const language = body.language || 'en';
@@ -46,13 +53,7 @@ export async function POST(request: NextRequest) {
     if (!['en', 'zh'].includes(language)) {
       return new Response(
         JSON.stringify({ error: 'Invalid language specified' }),
-        {
-          status: 400,
-          headers: {
-            'Content-Type': 'application/json',
-            ...corsHeaders,
-          },
-        }
+        { status: 400, headers }
       );
     }
 
@@ -91,13 +92,7 @@ export async function POST(request: NextRequest) {
 
     return new Response(
       JSON.stringify({ strategy, garlicUsage, effectiveness }),
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders,
-        },
-      }
+      { status: 200, headers }
     );
   } catch (error: any) {
     console.error('API Error:', error);
@@ -105,13 +100,7 @@ export async function POST(request: NextRequest) {
       JSON.stringify({
         error: error.message || 'Failed to generate strategy',
       }),
-      {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders,
-        },
-      }
+      { status: 500, headers }
     );
   }
 } 
