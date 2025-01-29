@@ -99,8 +99,10 @@ const VampireDefense = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
-        body: JSON.stringify({ language })
+        body: JSON.stringify({ language }),
+        cache: 'no-store',
       });
 
       if (!response.ok) {
@@ -123,7 +125,6 @@ const VampireDefense = () => {
     } finally {
       setLoading(false);
       setIsBurning(false);
-      // Hide burn success message after 3 seconds
       setTimeout(() => setBurnSuccess(false), 3000);
     }
   };
