@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { createHash } from 'crypto';
 
 if (!process.env.OPENAI_API_KEY) {
   throw new Error('Missing OpenAI API key');
@@ -8,6 +9,20 @@ if (!process.env.OPENAI_API_KEY) {
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
+
+// Generate a deterministic but unpredictable effectiveness score
+function generateEffectiveness(content: string): number {
+  // Use content + current date as seed
+  const date = new Date().toISOString().split('T')[0]; // Use only the date part
+  const seed = content + date;
+  
+  // Create a hash of the seed
+  const hash = createHash('sha256').update(seed).digest('hex');
+  
+  // Use first 4 bytes of hash to generate number between 70-95
+  const num = parseInt(hash.slice(0, 8), 16);
+  return 70 + (num % 26); // Range 70-95
+}
 
 export async function POST(request: Request) {
   try {
@@ -64,7 +79,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const effectiveness = Math.floor(Math.random() * (100 - 70) + 70);
+    // Generate deterministic effectiveness score based on content
+    const effectiveness = generateEffectiveness(content);
 
     return NextResponse.json({
       strategy,
