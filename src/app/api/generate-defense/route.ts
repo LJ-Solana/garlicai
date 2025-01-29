@@ -27,7 +27,26 @@ async function generateEffectiveness(content: string): Promise<number> {
 
 export const runtime = 'edge';
 
+// Add OPTIONS handler for CORS
+export async function OPTIONS() {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  });
+}
+
 export async function POST(request: Request) {
+  // Add CORS headers
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  };
+
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000);
 
@@ -37,7 +56,7 @@ export async function POST(request: Request) {
     if (!['en', 'zh'].includes(language)) {
       return NextResponse.json(
         { error: 'Invalid language specified' },
-        { status: 400 }
+        { status: 400, headers }
       );
     }
 
@@ -82,7 +101,7 @@ export async function POST(request: Request) {
       strategy,
       garlicUsage,
       effectiveness,
-    });
+    }, { headers });
   } catch (error: any) {
     clearTimeout(timeoutId);
     console.error('API Error:', error);
@@ -90,13 +109,13 @@ export async function POST(request: Request) {
     if (error.name === 'AbortError') {
       return NextResponse.json(
         { error: 'Request timed out. Please try again.' },
-        { status: 504 }
+        { status: 504, headers }
       );
     }
 
     return NextResponse.json(
       { error: error.message || 'Failed to generate strategy' },
-      { status: error.code === 'ECONNABORTED' ? 504 : 500 }
+      { status: error.code === 'ECONNABORTED' ? 504 : 500, headers }
     );
   }
 } 
