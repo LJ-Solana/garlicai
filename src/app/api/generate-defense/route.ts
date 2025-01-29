@@ -27,36 +27,38 @@ async function generateEffectiveness(content: string): Promise<number> {
 
 export const runtime = 'edge';
 
-// Add OPTIONS handler for CORS
-export async function OPTIONS() {
-  return new Response(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
-  });
-}
+// Define allowed methods
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
-export async function POST(request: Request) {
-  // Add CORS headers
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST',
-    'Access-Control-Allow-Headers': 'Content-Type',
-  };
+export async function POST(req: Request) {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
+    });
+  }
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000);
 
   try {
-    const { language = 'en' } = await request.json();
+    const { language = 'en' } = await req.json();
     
     if (!['en', 'zh'].includes(language)) {
-      return NextResponse.json(
-        { error: 'Invalid language specified' },
-        { status: 400, headers }
+      return new Response(
+        JSON.stringify({ error: 'Invalid language specified' }),
+        {
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+          },
+        }
       );
     }
 
@@ -97,25 +99,37 @@ export async function POST(request: Request) {
 
     const effectiveness = await generateEffectiveness(content);
 
-    return NextResponse.json({
-      strategy,
-      garlicUsage,
-      effectiveness,
-    }, { headers });
+    return new Response(
+      JSON.stringify({
+        strategy,
+        garlicUsage,
+        effectiveness,
+      }),
+      {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+      }
+    );
   } catch (error: any) {
     clearTimeout(timeoutId);
     console.error('API Error:', error);
     
-    if (error.name === 'AbortError') {
-      return NextResponse.json(
-        { error: 'Request timed out. Please try again.' },
-        { status: 504, headers }
-      );
-    }
-
-    return NextResponse.json(
-      { error: error.message || 'Failed to generate strategy' },
-      { status: error.code === 'ECONNABORTED' ? 504 : 500, headers }
+    return new Response(
+      JSON.stringify({
+        error: error.name === 'AbortError' 
+          ? 'Request timed out. Please try again.'
+          : (error.message || 'Failed to generate strategy'),
+      }),
+      {
+        status: error.name === 'AbortError' ? 504 : 500,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+      }
     );
   }
 } 
