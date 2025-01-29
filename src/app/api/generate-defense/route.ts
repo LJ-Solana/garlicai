@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import OpenAI from 'openai';
 
 if (!process.env.OPENAI_API_KEY) {
@@ -25,29 +25,23 @@ async function generateEffectiveness(content: string): Promise<number> {
   return 70 + (num % 26); // Range 70-95
 }
 
-export const runtime = 'edge';
+export const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
 
-// Define allowed methods
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export async function OPTIONS() {
+  return new Response(null, {
+    status: 204,
+    headers: corsHeaders,
+  });
+}
 
-export async function POST(req: Request) {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 204,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-      },
-    });
-  }
-
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 15000);
-
+export async function POST(request: NextRequest) {
   try {
-    const { language = 'en' } = await req.json();
+    const body = await request.json();
+    const language = body.language || 'en';
     
     if (!['en', 'zh'].includes(language)) {
       return new Response(
@@ -56,7 +50,7 @@ export async function POST(req: Request) {
           status: 400,
           headers: {
             'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
+            ...corsHeaders,
           },
         }
       );
@@ -78,11 +72,7 @@ export async function POST(req: Request) {
       ],
       temperature: 0.7,
       max_tokens: 200,
-      presence_penalty: 0,
-      frequency_penalty: 0,
-    }, { signal: controller.signal });
-
-    clearTimeout(timeoutId);
+    });
 
     const content = completion.choices[0].message.content;
     if (!content) {
@@ -100,34 +90,26 @@ export async function POST(req: Request) {
     const effectiveness = await generateEffectiveness(content);
 
     return new Response(
-      JSON.stringify({
-        strategy,
-        garlicUsage,
-        effectiveness,
-      }),
+      JSON.stringify({ strategy, garlicUsage, effectiveness }),
       {
         status: 200,
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
+          ...corsHeaders,
         },
       }
     );
   } catch (error: any) {
-    clearTimeout(timeoutId);
     console.error('API Error:', error);
-    
     return new Response(
       JSON.stringify({
-        error: error.name === 'AbortError' 
-          ? 'Request timed out. Please try again.'
-          : (error.message || 'Failed to generate strategy'),
+        error: error.message || 'Failed to generate strategy',
       }),
       {
-        status: error.name === 'AbortError' ? 504 : 500,
+        status: 500,
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
+          ...corsHeaders,
         },
       }
     );
