@@ -1,6 +1,7 @@
 "use client"
 import React, { useState } from 'react';
-import { Brain, Copy, Check, Globe } from 'lucide-react';
+import { Brain, Copy, Check, Globe, Shield } from 'lucide-react';
+import Link from 'next/link';
 
 interface Translation {
   title: string;
@@ -117,6 +118,17 @@ const SimpleLanding = () => {
                 )}
               </button>
             </div>
+          </div>
+
+          {/* Defense Strategy Link */}
+          <div className="mt-16">
+            <Link 
+              href="/defense" 
+              className="inline-flex items-center px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-all duration-300 shadow-sm hover:shadow-md"
+            >
+              <Shield className="h-5 w-5 mr-2" />
+              Try Our Vampire Defense Generator
+            </Link>
           </div>
         </div>
       </div>
