@@ -24,9 +24,11 @@ function generateEffectiveness(content: string): number {
   return 70 + (num % 26); // Range 70-95
 }
 
+export const runtime = 'edge'; // Use edge runtime for better performance
+
 export async function POST(request: Request) {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout
+  const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
 
   try {
     const { language = 'en' } = await request.json();
@@ -38,46 +40,42 @@ export async function POST(request: Request) {
       );
     }
 
+    // Shorter, more focused prompts
     const systemContent = language === 'zh' 
-      ? "你是一位专门研究大蒜防御策略的吸血鬼防御专家。简短生成创意且略带幽默的防御策略。回复必须以'策略：'开头，然后是策略名称和详情，接着是'大蒜使用方法：'和具体说明。"
-      : "You are a vampire defense expert. Generate a brief, creative and somewhat humorous defense strategy. Your response must start with 'Strategy:' followed by name and details, then 'Garlic Usage:' with instructions.";
+      ? "生成简短的吸血鬼防御策略。格式：'策略：[名称和详情]' 然后 '大蒜使用方法：[说明]'。保持简洁。"
+      : "Generate a brief vampire defense strategy. Format: 'Strategy: [name and details]' then 'Garlic Usage: [instructions]'. Keep it concise.";
 
     const userContent = language === 'zh'
-      ? "生成一个简短的大蒜防御策略。包括策略名称和详情，以及具体的大蒜使用说明。"
-      : "Generate a brief vampire defense strategy using garlic. Include strategy name, details, and garlic usage instructions.";
+      ? "创建一个简短的防御策略"
+      : "Create a brief defense strategy";
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4-turbo-preview",
+      model: "gpt-3.5-turbo", // Use faster model
       messages: [
         { role: "system", content: systemContent },
         { role: "user", content: userContent }
       ],
       temperature: 0.7,
-      max_tokens: 300, // Reduced token limit
+      max_tokens: 200, // Further reduced token limit
+      presence_penalty: 0,
+      frequency_penalty: 0,
     }, { signal: controller.signal });
 
     clearTimeout(timeoutId);
 
     const content = completion.choices[0].message.content;
     if (!content) {
-      return NextResponse.json(
-        { error: 'No content generated' },
-        { status: 500 }
-      );
+      throw new Error('No content generated');
     }
 
-    const sections = content.split('\n\n');
+    const sections = content.split('\n');
     const strategy = sections[0]?.replace(language === 'zh' ? /^策略：?\s*/i : /^Strategy:?\s*/i, '').trim();
     const garlicUsage = sections[1]?.replace(language === 'zh' ? /^大蒜使用方法：?\s*/i : /^Garlic Usage:?\s*/i, '').trim();
 
     if (!strategy || !garlicUsage) {
-      return NextResponse.json(
-        { error: 'Missing required content' },
-        { status: 500 }
-      );
+      throw new Error('Invalid response format');
     }
 
-    // Generate deterministic effectiveness score based on content
     const effectiveness = generateEffectiveness(content);
 
     return NextResponse.json({
@@ -88,9 +86,17 @@ export async function POST(request: Request) {
   } catch (error: any) {
     clearTimeout(timeoutId);
     console.error('API Error:', error);
+    
+    if (error.name === 'AbortError') {
+      return NextResponse.json(
+        { error: 'Request timed out. Please try again.' },
+        { status: 504 }
+      );
+    }
+
     return NextResponse.json(
-      { error: error.name === 'AbortError' ? 'Request timed out' : (error.message || 'Failed to generate strategy') },
-      { status: error.name === 'AbortError' ? 504 : 500 }
+      { error: error.message || 'Failed to generate strategy' },
+      { status: error.code === 'ECONNABORTED' ? 504 : 500 }
     );
   }
 } 
