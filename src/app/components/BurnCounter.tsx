@@ -4,18 +4,30 @@ import { getTotalBurned } from '@/utils/supabase';
 
 export function BurnCounter() {
   const [totalBurned, setTotalBurned] = useState<number>(0);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     const fetchTotal = async () => {
-      const total = await getTotalBurned();
-      setTotalBurned(total);
+      try {
+        const total = await getTotalBurned();
+        setTotalBurned(total);
+        setError(false);
+      } catch (err) {
+        console.error('Error fetching total burns:', err);
+        setError(true);
+      }
     };
 
     fetchTotal();
-    // Update every 30 seconds
-    const interval = setInterval(fetchTotal, 30000);
+    
+    // Update every minute instead of 30 seconds to reduce load
+    const interval = setInterval(fetchTotal, 60000);
     return () => clearInterval(interval);
   }, []);
+
+  if (error) {
+    return null; // Hide component on error
+  }
 
   return (
     <div className="text-center bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-sm border border-yellow-100">

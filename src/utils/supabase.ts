@@ -52,16 +52,29 @@ export async function updateWalletScore(walletAddress: string, effectiveness: nu
 }
 
 export async function getTotalBurned(): Promise<number> {
-  const { data, error } = await supabase
-    .from('wallet_scores')
-    .select('total_burns')
-    .throwOnError();
+  try {
+    const { data, error } = await supabase
+      .from('wallet_scores')
+      .select('total_burns');
 
-  if (error) {
-    console.error('Error getting total burns:', error);
+    if (error) {
+      console.error('Error getting total burns:', error);
+      return 0;
+    }
+
+    if (!data || !Array.isArray(data)) {
+      console.error('Invalid data format from Supabase');
+      return 0;
+    }
+
+    const totalBurns = data.reduce((sum, record) => {
+      const burns = record.total_burns || 0;
+      return sum + burns;
+    }, 0);
+
+    return totalBurns * 5000; // Convert to GARLIC tokens
+  } catch (error) {
+    console.error('Failed to fetch total burns:', error);
     return 0;
   }
-
-  const totalBurns = data.reduce((sum, record) => sum + (record.total_burns || 0), 0);
-  return totalBurns * 5000; // Convert to GARLIC tokens
 } 
