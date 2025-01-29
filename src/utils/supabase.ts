@@ -49,4 +49,19 @@ export async function updateWalletScore(walletAddress: string, effectiveness: nu
   }
 
   return data;
+}
+
+export async function getTotalBurned(): Promise<number> {
+  const { data, error } = await supabase
+    .from('wallet_scores')
+    .select('total_burns')
+    .throwOnError();
+
+  if (error) {
+    console.error('Error getting total burns:', error);
+    return 0;
+  }
+
+  const totalBurns = data.reduce((sum, record) => sum + (record.total_burns || 0), 0);
+  return totalBurns * 5000; // Convert to GARLIC tokens
 } 

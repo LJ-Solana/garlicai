@@ -6,6 +6,7 @@ import { WalletButton } from './WalletButton';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { burnTokens } from '@/utils/solana';
 import { updateWalletScore } from '@/utils/supabase';
+import { BurnCounter } from './BurnCounter';
 
 const translations = {
   en: {
@@ -190,6 +191,8 @@ const VampireDefense = () => {
               {t.gameExplainer.note}
             </p>
           </div>
+
+          <BurnCounter />
 
           <button
             onClick={generateStrategy}
