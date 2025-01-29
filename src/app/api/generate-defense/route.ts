@@ -25,12 +25,8 @@ async function generateEffectiveness(content: string): Promise<number> {
   return 70 + (num % 26); // Range 70-95
 }
 
-export const config = {
-  runtime: 'edge',
-  api: {
-    bodyParser: true,
-  },
-};
+export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
 
 export async function OPTIONS() {
   return new Response(null, {
